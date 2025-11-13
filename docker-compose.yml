@@ -1,0 +1,28 @@
+name: proiect-aso
+services:
+  ollama:
+    build:
+      context: ./docker_ollama
+      dockerfile: ./Dockerfile
+    ports:
+        - "11435:11434"
+    volumes:
+        - ./ollama/ollama:/root/.ollama
+    container_name: ollama
+    networks:
+        ollama-docker:
+  mcp_server:
+    build:
+      context: ./my_server
+      dockerfile: ./Dockerfile
+    ports:
+        - "8101:8100"
+    container_name: mcp_server
+    networks:
+        ollama-docker:
+volumes:
+  ollama:
+
+networks:
+  ollama-docker:
+    external: true
