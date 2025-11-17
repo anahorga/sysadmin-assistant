@@ -5,12 +5,13 @@ from google.adk.tools.mcp_tool.mcp_session_manager import StreamableHTTPConnecti
 from dotenv import load_dotenv
 import os
 
-load_dotenv()  # încarcă automat variabilele din .env
+load_dotenv(override=False)  # încarcă automat variabilele din .env
 
 api_key = os.getenv("OLLAMA_API_BASE")
+url_mcp = os.getenv("URL_MCP")
 
 root_agent = Agent(
-    model=LiteLlm(model="ollama_chat/llama3.2",base_url=api_key,allow_tools=False),
+    model=LiteLlm(model="ollama_chat/llama3.2",base_url="http://ollama:11434",allow_tools=False),
     name="My_Sysadmin",
     description=(
         "hello world, i'm an agent that can do some sys admin stuff for you" 
@@ -27,7 +28,7 @@ If unsure, respond conversationally and do not call any tools unless instructed 
     tools=[
         MCPToolset(
             connection_params=StreamableHTTPConnectionParams(
-                url="http://localhost:8101/mcp",
+                url="http://mcp_server:8100/mcp",
             ),
             #tool_filter=["greet", "get_file_content"]
         )
