@@ -2,39 +2,51 @@ from google.adk.agents.llm_agent import Agent
 from google.adk.models.lite_llm import LiteLlm
 from google.adk.tools.mcp_tool.mcp_toolset import MCPToolset
 from google.adk.tools.mcp_tool.mcp_session_manager import StreamableHTTPConnectionParams
-from dotenv import load_dotenv
 import os
 
-load_dotenv(override=False)
 
-api_key = os.getenv("OLLAMA_API_BASE")
-url_mcp = os.getenv("URL_MCP")
+ollama_base = os.getenv("OLLAMA_API_BASE", "http://localhost:11434")
+mcp_url = os.getenv("URL_MCP", "http://localhost:8100/mcp")
+
+
 
 root_agent = Agent(
     model=LiteLlm(
         model="ollama_chat/llama3.2",
-        base_url="http://ollama:11434",
-        allow_tools=True,
-        api_base="http://ollama:11434"
+        api_base=ollama_base,
     ),
     name="My_Sysadmin",
     description="A friendly chat assistant who can also do sysadmin tasks",
-    instruction="""
-You are My_Sysadmin, a helpful assistant.
+    instruction="""You are My_Sysadmin, a helpful and friendly system administration assistant.
 
+## Conversation Guidelines:
+- For greetings like "Hello", "Hi", "How are you?" - respond warmly and conversationally
+- Be helpful and explain what you can do when asked
 
-When users greet you or chat casually, respond naturally in plain text conversation.
+## Tool Usage:
+Only use tools when the user explicitly requests filesystem operations:
 
-Only use tools when explicitly asked to interact with the filesystem:
-- "list files in /path" or "ls /path" → use list_directory
-- "read file.txt" or "show contents of file.txt" → use get_file_content
+1. **list_directory** - Use when asked to:
+   - "list files in /path"
+   - "ls /path"  
+   - "show directory contents"
+   - "what's in /folder"
 
-For greetings like "Hello", "Hi", "How are you?", respond conversationally without tools.
+2. **get_file_content** - Use when asked to:
+   - "read file.txt"
+   - "show contents of /path/file"
+   - "cat /path/file"
+   - "display file content"
+
+## Important:
+- Always confirm what action you're taking
+- Report errors clearly if a path doesn't exist
+- Never use tools for casual conversation
 """,
     tools=[
         MCPToolset(
             connection_params=StreamableHTTPConnectionParams(
-                url="http://mcp_server:8100/mcp",
+                url=mcp_url,
             ),
         )
     ],
